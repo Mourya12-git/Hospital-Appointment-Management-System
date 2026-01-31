@@ -31,7 +31,7 @@ class Doctorserializer(serializers.ModelSerializer):
         model=Doctor
         fields=('name','specializations','hospitals','charge',)
 
-class Timingsserializer(serializers.Modelserializer):
+class Timingsserializer(serializers.ModelSerializer):
     class Meta():                                                                                               #
         model=Timings
         fields=('name','hospital','starttime','endtime',)
@@ -41,3 +41,7 @@ class Patientserializer(serializers.ModelSerializer):
         model=patient
         fields=('name','age','hospital','appointment',)                                                          #
         
+class loginserializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
