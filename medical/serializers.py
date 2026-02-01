@@ -19,7 +19,7 @@ class registrationserializer(serializers.ModelSerializer):
 class Hospitalserializer(serializers.ModelSerializer):
     class Meta():                                                                               #
         model=Hospital
-        fields=('name','location','specilaizations','charge',)
+        fields=('user','name','location','specilaizations','charge',)
         
 class specilizationserilizer(serializers.ModelSerializer):
     class Meta():

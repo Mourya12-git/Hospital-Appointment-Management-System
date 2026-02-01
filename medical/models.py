@@ -19,13 +19,13 @@ class Hospital(models.Model):
         return self.name
     
 class Doctor(models.Model):
-    name=models.ForeignKey(User,on_delete=models.CASCADE)
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
     specializations=models.ManyToManyField(specialization)
     hospitals=models.ManyToManyField(Hospital)
     charge=models.PositiveIntegerField()
 
 class Timings(models.Model):
-    name=models.ForeignKey(Doctor,on_delete=models.CASCADE)
+    user=models.ForeignKey(Doctor,on_delete=models.CASCADE)
     hospital=models.ForeignKey(Hospital,on_delete=models.CASCADE)
     starttime=models.DateTimeField()
     endtime=models.TimeField()

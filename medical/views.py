@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .serializers import Patientserializer,Doctorserializer,Hospitalserializer,Timingsserializer,registrationserializer,specilizationserilizer,loginserializer
 from .models import Doctor,specialization,Hospital,patient,Timings
+from .forms import Doctorform,patientform,specializationform,Timingsform,Hospitalform
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate,login,logout
@@ -18,11 +19,18 @@ from rest_framework.permissions import IsAuthenticated,DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend,OrderingFilter
 from rest_framework import filters
 
+def home(request):
+    return HttpResponse('HELLO')
+
 def register(request):
     reg=registrationserializer()
     if request.method=="POST":
-        reg=registrationserializer(request.POST)
-        reg.save()
+        reg=registrationserializer(data=request.POST)
+        if reg.is_valid():
+            reg.save()
+            return HttpResponseRedirect(reverse('medical:login'))
+        else:
+            print(reg.errors)
     return render(request,'register.html',{'users':reg})
 
 def loginuser(request):
@@ -33,9 +41,9 @@ def loginuser(request):
         user=authenticate(username=username,password=password)
         
         if user:
-            if user.is_active():
+            if user.is_active:
                 login(request,user)
-                return HttpResponseRedirect(reverse('medical:home'))
+                return HttpResponseRedirect(reverse('medical:hospital'))
         else:
             return HttpResponseRedirect(reverse('medical:register'))
         
@@ -44,17 +52,25 @@ def loginuser(request):
 @login_required
 def logoutuser(request):
     logout(request)
-    return HttpResponseRedirect(reverse('medical:home'))
+    return HttpResponseRedirect(reverse('medical:register'))
             
         
 def creation(request):
-    serializer=Hospitalserializer()
-    if request.method=="POST":
-        serializer=Hospitalserializer(data=request.POST)
-        if serializer.is_valid():
+    form = Hospitalform()
+
+    if request.method == "POST":
+        form = Hospitalform(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data.copy()
+            data['specilaizations'] = [s.id for s in data['specilaizations']]
+            data['user'] = request.user.id
+
+            serializer = Hospitalserializer(data=data)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
-            
-    return render(request,'admin.html',{'serializer':serializer})
+            return HttpResponseRedirect(reverse('medical:home'))
+
+    return render(request,'admin.html',{'form':form})
     
 def doctorregistration(request):
     serializer=Doctorserializer()
