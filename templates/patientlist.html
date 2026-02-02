@@ -1,0 +1,15 @@
+{%extends 'base.html'%}
+{%block body_block%}
+<div class="container">
+    {%for i in pat%}
+    <ul>
+        <li>{{i.user}} - {{i.hospital}}</li>
+        <p>
+            <a href={"% url 'medical:detail' pk=i.pk %"}>more</a>
+            
+        </p>
+    </ul>
+    {% endfor %}
+{%endblock%}
+
+        

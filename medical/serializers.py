@@ -24,22 +24,22 @@ class Hospitalserializer(serializers.ModelSerializer):
 class specilizationserilizer(serializers.ModelSerializer):
     class Meta():
         model=specialization
-        fields=('sspecialities',)
+        fields=('specialities',)
 
 class Doctorserializer(serializers.ModelSerializer):
-    class meta():                                                                                               #
+    class Meta():                                                                                               #
         model=Doctor
-        fields=('name','specializations','hospitals','charge',)
+        fields=('user','specializations','hospitals','charge',)
 
 class Timingsserializer(serializers.ModelSerializer):
     class Meta():                                                                                               #
         model=Timings
-        fields=('name','hospital','starttime','endtime',)
+        fields=('user','hospital','starttime','endtime',)
         
 class Patientserializer(serializers.ModelSerializer):
     class Meta():
         model=patient
-        fields=('name','age','hospital','appointment',)                                                          #
+        fields=('user','age','hospital','appointment',)                                                          #
         
 class loginserializer(serializers.ModelSerializer):
     username = serializers.CharField()

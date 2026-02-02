@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate,login,logout
 from django.http import HttpResponseRedirect,HttpResponse
 from django.shortcuts import render,get_object_or_404
+from rest_framework import status,mixins,generics,viewsets
 from django.views.generic import View,TemplateView,CreateView,UpdateView,DeleteView,ListView,DetailView
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
@@ -53,8 +54,7 @@ def loginuser(request):
 def logoutuser(request):
     logout(request)
     return HttpResponseRedirect(reverse('medical:register'))
-            
-        
+                   
 def creation(request):
     form = Hospitalform()
 
@@ -71,29 +71,76 @@ def creation(request):
             return HttpResponseRedirect(reverse('medical:home'))
 
     return render(request,'admin.html',{'form':form})
+
+class HospitalAPI(viewsets.ModelViewSet):
+    serializer_class=Hospitalserializer
+    http_method_names=['patch','get','delete']
+    def get_queryset(self):
+        return Hospital.objects.filter(user=self.request.user)
     
 def doctorregistration(request):
-    serializer=Doctorserializer()
+    form=Doctorform()
     if request.method=="POST":
-        serializer=Doctorserializer(data=request.POST)
-        if serializer.is_valid():
-            serializer.save()           
-    return render(request,'doctor.html',{'serializer':serializer})
+        form=Doctorform(request.POST)
+        if form.is_valid():
+            data=form.cleaned_data.copy()
+            data['specializations']=[s.id for s in data['specializations']]
+            data['hospitals']=[s.id for s in data['hospitals']]
+            data['user']=request.user.id 
+            
+            serializer=Doctorserializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()       
+            return HttpResponseRedirect(reverse('medical:home'))
+            
+    return render(request,'doctor.html',{'form':form})
     
-    
+class DoctorAPI(viewsets.ModelViewSet):
+    serializer_class=Doctorserializer
+    http_method_names=['get','delete','patch']
+    def get_queryset(self):
+        return Doctor.objects.filter(user=self.request.user)
+
 def patientview(request):
-    serializer=Patientserializer()
+    form=patientform
+    
     if request.method=="POST":
-        serializer=Patientserializer(data=request.POST)
-        if serializer.is_valid():            
+        form=patientform(request.POST)
+        if form.is_valid():
+            data=form.cleaned_data.copy()
+            data['user']=request.user.id 
+            data['hospital']=data['hospital'].id
+            data['appointment']=data['appointment'].id
+            serializer=Patientserializer(data=data)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
-    return render(request,'patient.html',{'serializer':serializer})    
-    
+            
+    return render(request,'patient.html',{'form':form})    
+
+
+class patientlist(ListView):
+    model=patient
+    template_name='patientlist.html'
+    context_object_name='pat'
+
 def slots(request):
-    serializer=Timingsserializer()
-    if request.method=="POST":
-        serializer=Timingsserializer(data=request.POST)
-    if serializer.is_valid():
-        serializer.save()
+    form=Timingsform
     
-    return render(request,'slots.html',{'serializer':serializer})    
+    if request.method=="POST":
+        form=Timingsform(request.POST)
+        if form.is_valid():
+            data=form.cleaned_data.copy()
+            data['user']=request.user.id 
+            data['hospital']=data['hospital'].id 
+            serializer=Timingsserializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+    
+    return render(request,'slots.html',{'form':form})    
+
+class slotsAPI(viewsets.ModelViewSet):
+    serializer_class=Timingsserializer
+    http_method_names=['get','delete','patch']
+    def get_queryset(self):
+        doctor=Doctor.objects.get(user=self.request.user)
+        return Timings.objects.filter(user=doctor)

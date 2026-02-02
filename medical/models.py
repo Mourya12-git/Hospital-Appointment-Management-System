@@ -31,12 +31,11 @@ class Timings(models.Model):
     endtime=models.TimeField()
     
 class patient(models.Model):
-    name=models.CharField(max_length=100)
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
     age=models.IntegerField()
     hospital=models.ForeignKey(Hospital,on_delete=models.CASCADE)
     appointment=models.ForeignKey(Timings,on_delete=models.CASCADE)
     
-    def __str__(self):
-        return self.name
+  
     
     

@@ -26,7 +26,22 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'medical:hospital' %}">HOSPITAL</a>
           </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'medical:doc' %}">DOCTOR</a>
+          </li>
           
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'medical:slots' %}">SLOTS</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'medical:patientlist' %}">PATIENTS</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'medical:patient' %}">PATIENT</a>
+          </li>
         {% else %}
              <li class="nav-item">
                 <a class="nav-link" href="{% url 'medical:login' %}">LOGIN</a>
