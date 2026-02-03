@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .serializers import Patientserializer,Doctorserializer,Hospitalserializer,Timingsserializer,registrationserializer,specilizationserilizer,loginserializer
-from .models import Doctor,specialization,Hospital,patient,Timings
+from .models import Doctor,specialization,Hospital,patient,Timings,income
 from .forms import Doctorform,patientform,specializationform,Timingsform,Hospitalform
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -94,6 +94,17 @@ def doctorregistration(request):
             return HttpResponseRedirect(reverse('medical:home'))
             
     return render(request,'doctor.html',{'form':form})
+
+class doctorearnings(ListView):
+    model=income
+    template_name='earnings.html'
+    context_object_name='earnings'
+    
+    def get_queryset(self):
+        
+        return super().get_queryset
+    
+ 
     
 class DoctorAPI(viewsets.ModelViewSet):
     serializer_class=Doctorserializer
@@ -101,20 +112,31 @@ class DoctorAPI(viewsets.ModelViewSet):
     def get_queryset(self):
         return Doctor.objects.filter(user=self.request.user)
 
+from django.db import transaction
+
 def patientview(request):
     form=patientform
     
     if request.method=="POST":
-        form=patientform(request.POST)
-        if form.is_valid():
-            data=form.cleaned_data.copy()
-            data['user']=request.user.id 
-            data['hospital']=data['hospital'].id
-            data['appointment']=data['appointment'].id
-            serializer=Patientserializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+        with transaction.atomic():
+            form=patientform(request.POST)
+            form_obj = form.save(commit=False)
+            form_obj.user= request.user
+            form_obj.save()
             
+            booking = form_obj.appointment
+            hos = form_obj.hospital
+            doc = booking.user
+            
+            docfee = doc.charge
+            hosfee = hos.charge
+            
+            income.objects.create(
+                appointment = form_obj,
+                docincome = docfee - (docfee%hosfee),
+                hospitalincome = hosfee
+            )
+        
     return render(request,'patient.html',{'form':form})    
 
 
@@ -122,9 +144,9 @@ class patientlist(ListView):
     model=patient
     template_name='patientlist.html'
     context_object_name='pat'
-
+    
 def slots(request):
-    form=Timingsform
+    form=Timingsform 
     
     if request.method=="POST":
         form=Timingsform(request.POST)

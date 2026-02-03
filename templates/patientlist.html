@@ -3,9 +3,9 @@
 <div class="container">
     {%for i in pat%}
     <ul>
-        <li>{{i.user}} - {{i.hospital}}</li>
+        <li><h3>{{i.hospital}}</h3></li>
         <p>
-            <a href={"% url 'medical:detail' pk=i.pk %"}>more</a>
+            {{i.user}} booked his slot at {{i.appointment}}
             
         </p>
     </ul>

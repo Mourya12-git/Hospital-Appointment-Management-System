@@ -30,12 +30,14 @@ class Timings(models.Model):
     starttime=models.DateTimeField()
     endtime=models.TimeField()
     
+    
 class patient(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     age=models.IntegerField()
     hospital=models.ForeignKey(Hospital,on_delete=models.CASCADE)
     appointment=models.ForeignKey(Timings,on_delete=models.CASCADE)
     
-  
-    
-    
+class income(models.Model):
+    appointment=models.ForeignKey(patient,on_delete=models.CASCADE)
+    docincome=models.PositiveIntegerField()
+    hospitalincome=models.PositiveIntegerField()

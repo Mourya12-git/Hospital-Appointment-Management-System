@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{%block body_block%}
+{%for i in earnings%}
+    <h1>{{i.hospital}}</h1>
+    <h3>{{i.charge}}</h3>
+
+{% endblock %}
