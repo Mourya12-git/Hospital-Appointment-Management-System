@@ -1,7 +1,10 @@
 {% extends "base.html" %}
-{%block body_block%}
-{%for i in earnings%}
-    <h1>{{i.hospital}}</h1>
-    <h3>{{i.charge}}</h3>
 
+{% block body_block %}
+{% for i in earnings %}
+    <ol>
+    <h1>{{ i.appointment__hospital__name }}</h1>
+    <p>{{ i.total_income }}</p>
+    </ol>
+{% endfor %}
 {% endblock %}

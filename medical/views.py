@@ -5,7 +5,7 @@ from .forms import Doctorform,patientform,specializationform,Timingsform,Hospita
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate,login,logout
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect,HttpResponse,HttpResponseForbidden
 from django.shortcuts import render,get_object_or_404
 from rest_framework import status,mixins,generics,viewsets
 from django.views.generic import View,TemplateView,CreateView,UpdateView,DeleteView,ListView,DetailView
@@ -19,6 +19,7 @@ from rest_framework.authentication import BasicAuthentication,SessionAuthenticat
 from rest_framework.permissions import IsAuthenticated,DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend,OrderingFilter
 from rest_framework import filters
+from django.db.models import Sum
 
 def home(request):
     return HttpResponse('HELLO')
@@ -54,10 +55,13 @@ def loginuser(request):
 def logoutuser(request):
     logout(request)
     return HttpResponseRedirect(reverse('medical:register'))
-                   
+@login_required                 
 def creation(request):
+    if not Hospital.objects.filter(user=request.user).exists():
+        return HttpResponseForbidden("Hospital owners only")
+    
     form = Hospitalform()
-
+    
     if request.method == "POST":
         form = Hospitalform(request.POST)
         if form.is_valid():
@@ -95,49 +99,56 @@ def doctorregistration(request):
             
     return render(request,'doctor.html',{'form':form})
 
+from django.db import transaction
+
+def patientview(request):
+    form=patientform()
+    if request.method=="POST":
+        form=patientform(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                form_obj = form.save(commit=False)
+                form_obj.user = request.user
+                form_obj.save()
+
+                booking = form_obj.appointment   
+                hos = form_obj.hospital
+                doc = booking.user               
+
+                docfee = doc.charge
+
+                doctorfee = int(docfee * 0.6)
+                hospitalfee = int(docfee * 0.4)
+
+                income.objects.create(
+                    appointment=form_obj,
+                    docincome=doctorfee,
+                    hospitalincome=hospitalfee
+                )
+            
+    return render(request,'patient.html',{'form':form})  
+
 class doctorearnings(ListView):
     model=income
-    template_name='earnings.html'
+    template_name='docearnings.html'
     context_object_name='earnings'
-    
     def get_queryset(self):
-        
-        return super().get_queryset
+        doctor=Doctor.objects.get(user=self.request.user)
+        return income.objects.filter(
+    appointment__appointment__user=doctor
+).values(
+    'appointment__hospital__id',
+    'appointment__hospital__name'
+).annotate(
+    total_income=Sum('docincome')
+)
     
- 
     
 class DoctorAPI(viewsets.ModelViewSet):
     serializer_class=Doctorserializer
     http_method_names=['get','delete','patch']
     def get_queryset(self):
         return Doctor.objects.filter(user=self.request.user)
-
-from django.db import transaction
-
-def patientview(request):
-    form=patientform
-    
-    if request.method=="POST":
-        with transaction.atomic():
-            form=patientform(request.POST)
-            form_obj = form.save(commit=False)
-            form_obj.user= request.user
-            form_obj.save()
-            
-            booking = form_obj.appointment
-            hos = form_obj.hospital
-            doc = booking.user
-            
-            docfee = doc.charge
-            hosfee = hos.charge
-            
-            income.objects.create(
-                appointment = form_obj,
-                docincome = docfee - (docfee%hosfee),
-                hospitalincome = hosfee
-            )
-        
-    return render(request,'patient.html',{'form':form})    
 
 
 class patientlist(ListView):
