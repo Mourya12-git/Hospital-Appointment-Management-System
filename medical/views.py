@@ -55,6 +55,7 @@ def loginuser(request):
 def logoutuser(request):
     logout(request)
     return HttpResponseRedirect(reverse('medical:register'))
+
 @login_required                 
 def creation(request):
     if not Hospital.objects.filter(user=request.user).exists():
@@ -77,12 +78,15 @@ def creation(request):
     return render(request,'admin.html',{'form':form})
 
 class HospitalAPI(viewsets.ModelViewSet):
+    
     serializer_class=Hospitalserializer
     http_method_names=['patch','get','delete']
     def get_queryset(self):
         return Hospital.objects.filter(user=self.request.user)
     
 def doctorregistration(request):
+    if not Doctor.objects.filter(user=request.user).exists():
+        return HttpResponseForbidden("Doctors only")
     form=Doctorform()
     if request.method=="POST":
         form=Doctorform(request.POST)
@@ -133,6 +137,7 @@ class doctorearnings(ListView):
     template_name='docearnings.html'
     context_object_name='earnings'
     def get_queryset(self):
+        
         doctor=Doctor.objects.get(user=self.request.user)
         return income.objects.filter(
     appointment__appointment__user=doctor
@@ -142,14 +147,12 @@ class doctorearnings(ListView):
 ).annotate(
     total_income=Sum('docincome')
 )
-    
-    
+       
 class DoctorAPI(viewsets.ModelViewSet):
     serializer_class=Doctorserializer
     http_method_names=['get','delete','patch']
     def get_queryset(self):
         return Doctor.objects.filter(user=self.request.user)
-
 
 class patientlist(ListView):
     model=patient
@@ -157,13 +160,20 @@ class patientlist(ListView):
     context_object_name='pat'
     
 def slots(request):
+    if not Doctor.objects.filter(user=request.user).exists():
+        return HttpResponseForbidden("Doctors only")
     form=Timingsform 
-    
     if request.method=="POST":
         form=Timingsform(request.POST)
         if form.is_valid():
             data=form.cleaned_data.copy()
-            data['user']=request.user.id 
+            doctor=Doctor.objects.get(user=request.user)
+            data=form.cleaned_data.copy()
+            new_start=data['starttime']
+            new_end=data['endtime']
+            if Timings.objects.filter(user=doctor,starttime__lt=new_end,endtime__gt=new_start).exists():
+                return HttpResponseForbidden("Slot Already Exists")
+            data['user']=doctor.id 
             data['hospital']=data['hospital'].id 
             serializer=Timingsserializer(data=data)
             serializer.is_valid(raise_exception=True)

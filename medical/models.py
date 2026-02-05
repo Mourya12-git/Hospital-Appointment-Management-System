@@ -28,7 +28,7 @@ class Timings(models.Model):
     user=models.ForeignKey(Doctor,on_delete=models.CASCADE)
     hospital=models.ForeignKey(Hospital,on_delete=models.CASCADE)
     starttime=models.DateTimeField()
-    endtime=models.TimeField()
+    endtime=models.DateTimeField()
     
     
 class patient(models.Model):

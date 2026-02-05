@@ -20,32 +20,34 @@
         </li>
 
         {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:logout' %}">LOGOUT</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:hospital' %}">HOSPITAL</a>
-          </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medical:logout' %}">LOGOUT</a>
+            </li>
+            {% if user.hospital_set.exists %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'medical:hospital' %}">HOSPITAL</a>
+              </li>
+            {%endif%}
+            {% if user.doctor_set.exists %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'medical:doc' %}">DOCTOR</a>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'medical:slots' %}">SLOTS</a>
+              </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:doc' %}">DOCTOR</a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:slots' %}">SLOTS</a>
-          </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'medical:docearnings' %}">SALARY</a>
+              </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:docearnings' %}">SALARY</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:patientlist' %}">PATIENTS</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'medical:patient' %}">PATIENT</a>
-          </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'medical:patientlist' %}">PATIENTS</a>
+              </li>
+            {%endif%}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'medical:patient' %}">PATIENT</a>
+            </li>
         {% else %}
              <li class="nav-item">
                 <a class="nav-link" href="{% url 'medical:login' %}">LOGIN</a>

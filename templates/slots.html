@@ -1,8 +1,12 @@
 {%extends 'base.html'%}
 {%block body_block%}
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+  <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px;">
 <form method="POST" enctype="">
     {%csrf_token%}
     {{form.as_p}}
     <input type="submit" class="btn btn-primary" value="CREATE">
 </form>
+</div>
+</div>
 {%endblock%}

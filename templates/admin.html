@@ -1,8 +1,39 @@
-{%extends 'base.html'%}
-{%block body_block%}
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{form.as_p}}
-    <input type="submit" class="btn btn-primary" value="CREATE">
-</form>
-{%endblock%}
+{% extends "base.html" %}
+
+{% block body_block %}
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+  <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px;">
+    
+    <h3 class="text-center mb-4">Create Hospital</h3>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.location.label_tag }}
+        {{ form.location }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.specilaizations.label_tag }}
+        {{ form.specilaizations }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.charge.label_tag }}
+        {{ form.charge }}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        CREATE
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
