@@ -1,6 +1,6 @@
 Hospital & Appointment Management System (Django Backend)
 
-A backend-focused Hospital & Appointment Management System built using **Django + Django REST Framework**, designed to model real-world hospital workflows including doctor scheduling, patient booking, revenue sharing, and role-based access control.
+A backend-focused Hospital & Appointment Management System built using **Django , Django REST Framework**, designed to model real-world hospital workflows including doctor scheduling, patient booking, revenue sharing, and role-based access control.
 
 This project intentionally goes beyond basic CRUD and focuses on **data modeling, business logic, conflict handling, and backend design**.
 
