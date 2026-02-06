@@ -86,7 +86,7 @@ This project intentionally goes beyond basic CRUD and focuses on **data modeling
 
 ---
 
-## 🔐 Authentication & Authorization
+## Authentication & Authorization
 - Django session-based authentication
 - Role-based authorization implemented using domain models:
   - `Doctor.objects.filter(user=request.user)`
@@ -97,7 +97,7 @@ This project intentionally goes beyond basic CRUD and focuses on **data modeling
 
 ---
 
-## 🧠 Key Backend Concepts Used
+## Key Backend Concepts Used
 - Django ORM relationship traversal
 - Aggregations (`annotate`, `Sum`)
 - Transaction handling (`transaction.atomic`)
@@ -117,7 +117,7 @@ This project intentionally goes beyond basic CRUD and focuses on **data modeling
 
 ---
 
-## 📂 Project Structure (Simplified)
+## Project Structure (Simplified)
 
 medical/
 ├── models.py
@@ -132,6 +132,3 @@ medical/
 │ ├── slots.html
 │ ├── patient.html
 │ ├── earnings.html
-
-yaml
-Copy code
