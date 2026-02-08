@@ -4,14 +4,13 @@
 <div class="container mt-5">
   <div class="card shadow-sm">
     <div class="card-body">
-<h3 class="mb-4">Page Title</h3>
-{% for i in earnings %}
+<h3 class="mb-4">Earnings</h3>
+{% for i in earn %}
     <ol>
-    <h1>{{ i.appointment__hospital__name }}</h1>
+    <h1>{{i.appointment__appointment__user__user__username}}</h1>
     <p>{{ i.total_income }}</p>
     </ol>
-
-    </div>
+  </div>
   </div>
 </div>
 {%endfor%}

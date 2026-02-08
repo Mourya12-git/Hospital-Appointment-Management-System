@@ -7,6 +7,10 @@
     {{form.as_p}}
     <input type="submit" class="btn btn-primary" value="CREATE">
 </form>
+<form method="GET">
+        <input type="text" name="query" placeholder="Search by name" value="{{ request.GET.query }}">
+        <button type="submit">Search</button>
+    </form>
 </div>
 </div>
 {%endblock%}

@@ -27,6 +27,9 @@
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'medical:hospital' %}">HOSPITAL</a>
               </li>
+             <li class="nav-item">
+                <a class="nav-link" href="{% url 'medical:earnings' %}">INCOME</a>
+              </li>
             {%endif%}
             {% if user.doctor_set.exists %}
               <li class="nav-item">

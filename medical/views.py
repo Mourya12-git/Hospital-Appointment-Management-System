@@ -22,7 +22,7 @@ from rest_framework import filters
 from django.db.models import Sum
 
 def home(request):
-    return HttpResponse('HELLO')
+    return render(request,'home.html')
 
 def register(request):
     reg=registrationserializer()
@@ -120,6 +120,11 @@ def patientview(request):
                 doc = booking.user               
 
                 docfee = doc.charge
+                booking = form_obj.appointment
+                if booking.booked:
+                    return HttpResponseForbidden("Slot already booked")
+                booking.booked = True
+                booking.save()
 
                 doctorfee = int(docfee * 0.6)
                 hospitalfee = int(docfee * 0.4)
@@ -130,6 +135,7 @@ def patientview(request):
                     hospitalincome=hospitalfee
                 )
             
+            
     return render(request,'patient.html',{'form':form})  
 
 class doctorearnings(ListView):
@@ -139,6 +145,7 @@ class doctorearnings(ListView):
     def get_queryset(self):
         
         doctor=Doctor.objects.get(user=self.request.user)
+        
         return income.objects.filter(
     appointment__appointment__user=doctor
 ).values(
@@ -147,6 +154,17 @@ class doctorearnings(ListView):
 ).annotate(
     total_income=Sum('docincome')
 )
+       
+class hospitalearnings(ListView):
+    model=income
+    template_name='earnings.html'
+    context_object_name='earn'
+    
+    def get_queryset(self):
+        
+        hospital=Hospital.objects.get(user=self.request.user)
+        return income.objects.filter(appointment__hospital__name=hospital).values('appointment__appointment__user__user__username').annotate(total_income=Sum('hospitalincome'))
+       
        
 class DoctorAPI(viewsets.ModelViewSet):
     serializer_class=Doctorserializer
@@ -178,12 +196,22 @@ def slots(request):
             serializer=Timingsserializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
     
     return render(request,'slots.html',{'form':form})    
+
+class slotlist(ListView):
+    model=Timings
+    context_object_name='time'
+    template_name='slotlist.html'
+    
+    def get_queryset(self):
+        return Timings.objects.filter(booked=False)
+    
 
 class slotsAPI(viewsets.ModelViewSet):
     serializer_class=Timingsserializer
     http_method_names=['get','delete','patch']
     def get_queryset(self):
         doctor=Doctor.objects.get(user=self.request.user)
-        return Timings.objects.filter(user=doctor)
+        return Timings.objects.filter(user=doctor)    

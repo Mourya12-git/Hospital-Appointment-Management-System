@@ -20,6 +20,8 @@ urlpatterns = [
     path('slots/',views.slots,name='slots'),
     path('patientlist/',views.patientlist.as_view(),name='patientlist'),
     path('docearnings/',views.doctorearnings.as_view(),name='docearnings'),
+    path('earnings/',views.hospitalearnings.as_view(),name='earnings'),
+    path('slotlist/',views.slotlist.as_view(),name='slotlist'),
 ]
 
 

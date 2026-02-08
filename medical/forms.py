@@ -13,17 +13,24 @@ class Doctorform(forms.ModelForm):
         model=Doctor
         exclude = ['user']
         
-        
 class patientform(forms.ModelForm):
     class Meta():
         model=patient
         exclude = ['user']
         fields=('age','hospital','appointment')
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+        self.fields['appointment'].queryset = Timings.objects.filter(
+                booked=False
+            )
 
 class Timingsform(forms.ModelForm):
     class Meta():
         model=Timings
-        exclude = ['user']
+        exclude = ['user','booked']
         
 class specializationform(forms.ModelForm):
     class Meta():

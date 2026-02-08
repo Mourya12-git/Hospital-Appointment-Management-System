@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block body_block %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+
+      <div class="card shadow-lg border-0">
+        <div class="card-body text-center p-5">
+
+          <h1 class="mb-3">🏥 Hospital Management System</h1>
+
+          <p class="lead text-muted mb-4">
+            A backend-driven system for managing hospitals, doctors,
+            appointments, and revenue — built with Django & DRF.
+          </p>
+          
+            {% if user.is_authenticated %}
+                {% if user.doctor_set.exists %}
+                <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'medical:doc' %}" class="btn btn-primary">
+                    Doctor registration
+                </a>
+                <a href="{% url 'medical:slots' %}" class="btn btn-outline-secondary">
+                    View Slots
+                </a>
+                </div>
+                {% elif user.hospital_set.exists %}
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'medical:hospital' %}" class="btn btn-primary">
+                    Hospital registration
+                </a>
+                <a href="{% url 'medical:earnings' %}" class="btn btn-outline-secondary">
+                    Income
+                </a>
+                </div>
+                    
+                {%else%}
+                <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'medical:patient' %}" class="btn btn-primary">
+                    Book Appointment
+                </a>
+                <a href="{% url 'medical:slots' %}" class="btn btn-outline-secondary">
+                    View Slots
+                </a>
+                </div>
+                {%endif%}
+          {% else %}
+            <div class="d-flex justify-content-center gap-3">
+              <a href="{% url 'medical:login' %}" class="btn btn-primary">
+                Login
+              </a>
+              <a href="{% url 'medical:register' %}" class="btn btn-outline-secondary">
+                Register
+              </a>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
