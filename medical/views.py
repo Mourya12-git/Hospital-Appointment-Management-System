@@ -20,6 +20,8 @@ from rest_framework.permissions import IsAuthenticated,DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend,OrderingFilter
 from rest_framework import filters
 from django.db.models import Sum
+from rest_framework.permissions import BasePermission
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 def home(request):
     return render(request,'home.html')
@@ -45,7 +47,7 @@ def loginuser(request):
         if user:
             if user.is_active:
                 login(request,user)
-                return HttpResponseRedirect(reverse('medical:hospital'))
+                return HttpResponseRedirect(reverse('medical:home'))
         else:
             return HttpResponseRedirect(reverse('medical:register'))
         
@@ -77,13 +79,24 @@ def creation(request):
 
     return render(request,'admin.html',{'form':form})
 
+class isdoctor(BasePermission):
+    def has_permission(self, request, view):
+        return Doctor.objects.filter(user=request.user).exists()
+    
+class isowner(BasePermission):
+    def has_permission(self, request, view):
+        return Hospital.objects.filter(user=request.user).exists() 
+    
 class HospitalAPI(viewsets.ModelViewSet):
     
     serializer_class=Hospitalserializer
     http_method_names=['patch','get','delete']
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, isowner]
     def get_queryset(self):
         return Hospital.objects.filter(user=self.request.user)
-    
+
+@login_required   
 def doctorregistration(request):
     if not Doctor.objects.filter(user=request.user).exists():
         return HttpResponseForbidden("Doctors only")
@@ -105,6 +118,7 @@ def doctorregistration(request):
 
 from django.db import transaction
 
+@login_required
 def patientview(request):
     form=patientform()
     if request.method=="POST":
@@ -125,20 +139,20 @@ def patientview(request):
                     return HttpResponseForbidden("Slot already booked")
                 booking.booked = True
                 booking.save()
-
+                
                 doctorfee = int(docfee * 0.6)
                 hospitalfee = int(docfee * 0.4)
-
+  
                 income.objects.create(
                     appointment=form_obj,
                     docincome=doctorfee,
                     hospitalincome=hospitalfee
                 )
-            
+            return HttpResponseRedirect(reverse('medical:home'))
             
     return render(request,'patient.html',{'form':form})  
 
-class doctorearnings(ListView):
+class doctorearnings(ListView,LoginRequiredMixin):
     model=income
     template_name='docearnings.html'
     context_object_name='earnings'
@@ -155,7 +169,7 @@ class doctorearnings(ListView):
     total_income=Sum('docincome')
 )
        
-class hospitalearnings(ListView):
+class hospitalearnings(ListView,LoginRequiredMixin):
     model=income
     template_name='earnings.html'
     context_object_name='earn'
@@ -169,14 +183,19 @@ class hospitalearnings(ListView):
 class DoctorAPI(viewsets.ModelViewSet):
     serializer_class=Doctorserializer
     http_method_names=['get','delete','patch']
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, isdoctor]
     def get_queryset(self):
+        Doctor.objects.filter(user=self.request.user)
         return Doctor.objects.filter(user=self.request.user)
+        
 
-class patientlist(ListView):
+class patientlist(ListView,LoginRequiredMixin):
     model=patient
     template_name='patientlist.html'
     context_object_name='pat'
-    
+
+@login_required  
 def slots(request):
     if not Doctor.objects.filter(user=request.user).exists():
         return HttpResponseForbidden("Doctors only")
@@ -196,11 +215,12 @@ def slots(request):
             serializer=Timingsserializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-
+            return HttpResponseRedirect(reverse('medical:home'))
     
-    return render(request,'slots.html',{'form':form})    
+    return render(request,'slots.html',{'form':form})   
+ 
 
-class slotlist(ListView):
+class slotlist(ListView,LoginRequiredMixin):
     model=Timings
     context_object_name='time'
     template_name='slotlist.html'
@@ -212,6 +232,8 @@ class slotlist(ListView):
 class slotsAPI(viewsets.ModelViewSet):
     serializer_class=Timingsserializer
     http_method_names=['get','delete','patch']
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, isdoctor]
     def get_queryset(self):
         doctor=Doctor.objects.get(user=self.request.user)
         return Timings.objects.filter(user=doctor)    

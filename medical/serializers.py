@@ -38,8 +38,7 @@ class Timingsserializer(serializers.ModelSerializer):
         
 class Patientserializer(serializers.ModelSerializer):
     class Meta():
-        model=patient
-        fields=('user','age','hospital','appointment',)                                                          #
+        model=patient                                                       #
         
 class loginserializer(serializers.ModelSerializer):
     username = serializers.CharField()

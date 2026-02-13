@@ -27,9 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+from datetime import timedelta
+
+
 REST_FRAMEWORK={
     'DEFAULT_AUTHENTICATION_CLASSES':[
     'rest_framework.authentication.SessionAuthentication',
+    'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSIONS_CLASSES':['rest_framework.permissions.isAuthenticated',
     ],
@@ -37,6 +41,11 @@ REST_FRAMEWORK={
     'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE':2,
     }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 # Application definition
 
